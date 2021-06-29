@@ -1,0 +1,101 @@
+Chain 0 jones: 1A^0 + 
+Chain 1 jones: 1A^0 + 
+Chain 2 jones: 1A^0 + 
+Chain 3 jones: 1A^0 + 
+Chain 4 jones: 1A^0 + 
+Chain 5 jones: 1A^0 + 
+Chain 6 jones: 1A^0 + 
+Chain 7 jones: 1A^0 + 
+Chain 8 jones: 1A^0 + 
+Chain 9 jones: -0.3A^-3 + 0.7A^0 + 
+Chain 10 jones: 1A^0 + 
+Chain 11 jones: 0.9A^0 + -0.1A^3 + 
+Chain 12 jones: 1A^0 + 
+Chain 13 jones: 1A^0 + 
+Chain 14 jones: 1A^0 + 
+Chain 15 jones: 1A^0 + 
+Chain 16 jones: 1A^0 + 
+Chain 17 jones: 1A^0 + 
+Chain 18 jones: 1A^0 + 
+Chain 19 jones: 1A^0 + 
+Chain 20 jones: -0.1A^-3 + 0.9A^0 + 
+Chain 21 jones: 0.9A^0 + 0.1A^4 + 0.1A^6 + -0.1A^10 + 
+Chain 22 jones: 1A^0 + 
+Chain 23 jones: 1A^0 + 
+Chain 24 jones: 0.8A^0 + -0.2A^3 + 
+Chain 25 jones: 1A^0 + 
+Chain 26 jones: 1A^0 + 
+Chain 27 jones: -0.1A^-4 + 0.9A^0 + 0.1A^2 + 0.1A^6 + 
+Chain 28 jones: 1A^0 + 
+Chain 29 jones: 1A^0 + 
+Chain 30 jones: 1A^0 + 
+Chain 31 jones: -0.2A^-3 + 0.8A^0 + 
+Chain 32 jones: 1A^0 + 
+Chain 33 jones: 1A^0 + 
+Chain 34 jones: 1A^0 + 
+Chain 35 jones: 1A^0 + 
+Chain 36 jones: 1A^0 + 
+Chain 37 jones: 1A^0 + 
+Chain 38 jones: 1A^0 + 
+Chain 39 jones: 1A^0 + 
+Chain 40 jones: 1A^0 + 
+Chain 41 jones: 1A^0 + 
+Chain 42 jones: -0.1A^-10 + 0.1A^-6 + 0.1A^-4 + 0.9A^0 + 
+Chain 43 jones: 1A^0 + 
+Chain 44 jones: 1A^0 + 
+Chain 45 jones: 1A^0 + 
+Chain 46 jones: 1A^0 + 
+Chain 47 jones: 1A^0 + 
+Chain 48 jones: 1A^0 + 
+Chain 49 jones: 1A^0 + 
+Chain 50 jones: 1A^0 + 
+Chain 51 jones: 1A^0 + 
+Chain 52 jones: 1A^0 + 
+Chain 53 jones: -0.1A^-3 + 0.9A^0 + 
+Chain 54 jones: 1A^0 + 
+Chain 55 jones: 1A^0 + 
+Chain 56 jones: 1A^0 + 
+Chain 57 jones: 1A^0 + 
+Chain 58 jones: 1A^0 + 
+Chain 59 jones: 1A^0 + 
+Chain 60 jones: 1A^0 + 
+Chain 61 jones: 1A^0 + 
+Chain 62 jones: 1A^0 + 
+Chain 63 jones: 1A^0 + 
+Chain 64 jones: 1A^0 + 
+Chain 65 jones: 1A^0 + 
+Chain 66 jones: 1A^0 + 
+Chain 67 jones: 1A^0 + 
+Chain 68 jones: 1A^0 + 
+Chain 69 jones: 1A^0 + 
+Chain 70 jones: 1A^0 + 
+Chain 71 jones: 1A^0 + 
+Chain 72 jones: 1A^0 + 
+Chain 73 jones: 1A^0 + 
+Chain 74 jones: -0.2A^-10 + 0.2A^-6 + 0.2A^-4 + 0.8A^0 + 
+Chain 75 jones: 1A^0 + 
+Chain 76 jones: 1A^0 + 
+Chain 77 jones: 0.9A^0 + -0.1A^3 + 
+Chain 78 jones: 1A^0 + 
+Chain 79 jones: -0.1A^-3 + 0.9A^0 + 
+Chain 80 jones: 1A^0 + 
+Chain 81 jones: 1A^0 + 
+Chain 82 jones: 1A^0 + 
+Chain 83 jones: 1A^0 + 
+Chain 84 jones: 1A^0 + 
+Chain 85 jones: 1A^0 + 
+Chain 86 jones: 1A^0 + 
+Chain 87 jones: 1A^0 + 
+Chain 88 jones: -0.1A^-3 + 0.9A^0 + 
+Chain 89 jones: 1A^0 + 
+Chain 90 jones: 1A^0 + 
+Chain 91 jones: 1A^0 + 
+Chain 92 jones: 1A^0 + 
+Chain 93 jones: 1A^0 + 
+Chain 94 jones: 1A^0 + 
+Chain 95 jones: 1A^0 + 
+Chain 96 jones: 1A^0 + 
+Chain 97 jones: 1A^0 + 
+Chain 98 jones: 1A^0 + 
+Chain 99 jones: 1A^0 + 
+Total system jones: -0.003A^-10 + 0.003A^-6 + 0.002A^-4 + -0.009A^-3 + 0.982A^0 + 0.001A^2 + -0.004A^3 + 0.001A^4 + 0.002A^6 + -0.001A^10 + 
