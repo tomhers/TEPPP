@@ -22,8 +22,16 @@ int main(int argc, char *argv[])
     int end_chunk = stoi(argv[5]);
     int step = stoi(argv[6]);
     int chunk = num_chains / size;
+    double box_dim;
+    if (argc >= 8) box_dim = stod(argv[7]);
+    else box_dim = 0;
     int num;
-    double **coords = read_coords(argv[1], &num);
+    double **coords;
+    if (box_dim == 0) {
+        coords = read_coords(argv[1], &num);
+    } else {
+        coords = read_coords(argv[1], &num, chain_length, box_dim);
+    }
     string fname = to_string(chain_length) + "lkmpiout" + to_string(rank) + ".txt";
     ofstream outfile;
     outfile.open(fname);
@@ -48,7 +56,7 @@ int main(int argc, char *argv[])
                 chain2[k][2] = coords[k + (j * chain_length)][2];
             }
 
-            for (int a = 10; a <= chain_length; a+=5) {
+            for (int a = start_chunk; a <= end_chunk; a+=step) {
                 double **temp_chain1 = new double*[a];
                 for (int b = 0; b < a; b++) {
                     temp_chain1[b] = new double[3];

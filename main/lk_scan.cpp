@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 
     if (argc < 7) {
         cout << "Not enough parameters! Exiting...\n";
-        return 0;
+        return -1;
     }
 
     int chain_length = stoi(argv[2]);
@@ -15,8 +15,16 @@ int main(int argc, char *argv[])
     int start_chunk = stoi(argv[4]);
     int end_chunk = stoi(argv[5]);
     int step = stoi(argv[6]);
+    double box_dim;
+    if (argc >= 8) box_dim = stod(argv[7]);
+    else box_dim = 0;
     int num;
-    double **coords = read_coords(argv[1], &num);
+    double **coords;
+    if (box_dim == 0) {
+        coords = read_coords(argv[1], &num);
+    } else {
+        coords = read_coords(argv[1], &num, chain_length, box_dim);
+    }
     ofstream outfile;
     outfile.open("lkscanout.txt");
 
@@ -38,7 +46,7 @@ int main(int argc, char *argv[])
                 chain2[k][2] = coords[k + (j * chain_length)][2];
             }
 
-            for (int a = 10; a <= chain_length; a+=5) {
+            for (int a = start_chunk; a <= end_chunk; a+=step) {
                 double **temp_chain1 = new double*[a];
                 for (int b = 0; b < a; b++) {
                     temp_chain1[b] = new double[3];

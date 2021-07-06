@@ -16,6 +16,138 @@
 
 using namespace std;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+#define CHECK(x)    do{if(0 != (error = (x))) goto fail;}while(0)
+#define FAIL(...)   do{fprintf(stderr, __VA_ARGS__); error = 1; goto fail;}while(0)
+
+typedef struct
+{
+    FILE     *file;
+    uint64_t *array;
+    int       offset;
+}
+ruv_buffer_t;
+
+int  ruv_init(ruv_buffer_t *buffer);
+int  ruv_uniform(ruv_buffer_t *buffer, double *x);
+int  ruv_generate(ruv_buffer_t *buffer, int ndimensions, double vector[]);
+void ruv_free(ruv_buffer_t *buffer);
+
+static const double TWO_PI = 6.283185307179586476925287;
+
+#define BUFFER_LENGTH   1024
+
+static const char *RandomFileName = "/dev/urandom";
+
+int ruv_init(ruv_buffer_t *buffer)
+{
+    int error;
+    memset(buffer, 0, sizeof(ruv_buffer_t));
+
+    buffer->file = fopen(RandomFileName, "rb");
+    if (buffer->file == NULL)
+        FAIL("ruv_init: cannot open random device %s\n", RandomFileName);
+
+    buffer->array = static_cast<uint64_t *>(calloc(BUFFER_LENGTH, sizeof(buffer->array[0])));
+    if (buffer->array == NULL)
+        FAIL("ruv_init: cannot allocate memory\n");
+
+    /* Cause first call to ruv_uniform() to trigger a read. */
+    buffer->offset = BUFFER_LENGTH;
+
+    error = 0;
+fail:
+    if (error != 0)
+        ruv_free(buffer);
+
+    return error;
+}
+
+
+int ruv_uniform(ruv_buffer_t *buffer, double *x)
+{
+    int error;
+
+    /* Keep reading until the resulting random number is not zero. */
+    do
+    {
+        if (buffer->offset == BUFFER_LENGTH)
+        {
+            /* We need to load a new batch of random 64-bit unsigned integers. */
+            size_t nread = fread(buffer->array, sizeof(buffer->array[0]), BUFFER_LENGTH, buffer->file);
+            if (nread != BUFFER_LENGTH)
+                FAIL("ruv_uniform: Error reading from device %s\n", RandomFileName);
+            buffer->offset = 0;
+        }
+
+        *x = (double)buffer->array[buffer->offset++] / (double)0xffffffffffffffffLU;
+    } while (*x == 0.0);
+
+    /* Now *x contains a uniformly-distributed random value in the half-open range (0, 1]. */
+    error = 0;
+fail:
+    return error;
+}
+
+
+int ruv_generate(ruv_buffer_t *buffer, int ndimensions, double vector[])
+{
+    int error, i;
+    double A, B;    /* uniform random variables */
+    double radius, angle;
+    double sum;
+
+    do
+    {
+        sum = 0.0;
+        for (i=0; i < ndimensions; i += 2)
+        {
+            CHECK(ruv_uniform(buffer, &A));
+            CHECK(ruv_uniform(buffer, &B));
+            radius = sqrt(-2 * log(A));
+            angle = TWO_PI * B;
+            vector[i] = radius * cos(angle);
+            sum += vector[i] * vector[i];
+            if (i+1 < ndimensions)
+            {
+                vector[i+1] = radius * sin(angle);
+                sum += vector[i+1] * vector[i+1];
+            }
+        }
+    } while (sum == 0.0);   /* While extremely unlikely, it is possible to pick a zero vector. AVOID! */
+
+    /* Convert to a unit vector by dividing through by the length. */
+    sum = sqrt(sum);
+    for (i=0; i < ndimensions; ++i)
+        vector[i] /= sum;
+
+    error = 0;
+fail:
+    return error;
+}
+
+
+void ruv_free(ruv_buffer_t *buffer)
+{
+    if (buffer->file != NULL)
+    {
+        fclose(buffer->file);
+        buffer->file = NULL;
+    }
+
+    if (buffer->array != NULL)
+    {
+        free(buffer->array);
+        buffer->array = NULL;
+    }
+}
+
+#ifdef __cplusplus
+}
+#endif
+
 struct proj_coords {
     vector<vector<double>> coords;
     vector<vector<double>> proj;
@@ -48,7 +180,6 @@ bool are_collinear(vector<double> p1, vector<double> p2, vector<double> p3, vect
 bool intersect1(vector<double> p0, vector<double> p1, vector<double> p2, vector<double> p3, double *rx, double *ry);
 bool has_mult_crossings(vector<vector<int>> crossings);
 
-int orientation(double *p, double *q, double *r);
 int count_loops(vector<vector<int>> neigh_array, int n);
 
 double distance(vector<double> p1, vector<double> p2);
@@ -57,7 +188,7 @@ double dot3(const double *v1, const double *v2);
 double wr(double **chain, int length, bool is_closed);
 double lk(double **chain1, double **chain2, int length1, int length2, bool is_closed, double offx = 0, double offy = 0, double offz = 0);
 
-double *get_random_proj();
+vector<vector<double>> get_random_proj();
 vector<double> unwrap(vector<double> p1, vector<double> p2, double box_dim);
 vector<double> get_intersection(vector<double> p0, vector<double> p1, vector<double> p2, vector<double> p3);
 map<int, double> mult_poly(int power);
@@ -72,6 +203,7 @@ double **get_two_vec(const double *proj);
 double **generate_random_walk(int n);
 double **read_coords(string fname, int *n);
 double **read_coords(string fname, int *n, int chain_length, double box_dim);
+vector<vector<double>> invert_mat(vector<vector<double>> m);
 vector<vector<double>> get_proj(vector<vector<double>> coords, int n);
 
 Struct next_mult_crossings(vector<vector<double>> proj, vector<vector<double>> coords, vector<vector<int>> neigh_array, int n, bool is_closed);
@@ -213,7 +345,8 @@ bool intersect1(vector<double> p0, vector<double> p1, vector<double> p2, vector<
 /**
  * Checks if there is an edge that intersects with more than one other edge
  * 
- * @param crossings 
+ * @param crossings Vector of vectors each containing the indices of four points that form two crossing edges
+ * @return true if there is an edge that intesects more than one other edge, false if not
  */
 bool has_mult_crossings(vector<vector<int>> crossings)
 {
@@ -229,16 +362,14 @@ bool has_mult_crossings(vector<vector<int>> crossings)
 
 }
 
-int orientation(double *p, double *q, double *r)
-{
-
-  double val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]);
-  if (val == 0) return 0;
-
-  return (val > 0)? 1: 2;
-
-}
-
+/**
+ * Counts the number of loops formed by order of atoms in neigh_array.
+ * Used to calculate the bracket polynomial of each combination of crossing annealments.
+ * 
+ * @param neigh_array Vector of vectors that contain an the indices of an atom's neighbors
+ * @param n The number of atoms in the system
+ * @return The number of loops formed by the system
+ */
 int count_loops(vector<vector<int>> neigh_array, int n)
 {
 
@@ -268,6 +399,12 @@ int count_loops(vector<vector<int>> neigh_array, int n)
 
 }
 
+/**
+ * Gives the distance between two points
+ * 
+ * @param p1, p2 The points to measure the distance between
+ * @return The distance between p1 and p2
+ */
 double distance(vector<double> p1, vector<double> p2)
 {
 
@@ -275,6 +412,13 @@ double distance(vector<double> p1, vector<double> p2)
 
 }
 
+/**
+ * Compute the linking number between two edges formed by two points each
+ * 
+ * @param p1, p2 The two points that form the first edge in the calculation
+ * @param p3, p4 The two points that form the second edge in the calculation
+ * @return The linking number of the two edges formed by p1, p2, p3, and p4
+ */
 double compute_one(vector<double> p1, vector<double> p2, vector<double> p3, vector<double> p4)
 {
 
@@ -356,11 +500,22 @@ double compute_one(vector<double> p1, vector<double> p2, vector<double> p3, vect
 
 }
 
+/**
+ * Compute the dot product between two 3d vectors
+ */
 double dot3(const double *v1, const double *v2)
 {
   return v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2];
 }
 
+/**
+ * Compute the writhe of a chain
+ * 
+ * @param chain A 2d array containing the coordinates for the chain to compute the writhe of
+ * @param length The number of atoms in the chain
+ * @param is_closed True if the first atom of the chain is connected to the last, false otherwise
+ * @return The writhe of the chain
+ */
 double wr(double **chain, int length, bool is_closed)
 {
 
@@ -419,6 +574,17 @@ double wr(double **chain, int length, bool is_closed)
 
 }
 
+/**
+ * Compute the linking number between two chains
+ * 
+ * @param chain1 The coordinates of the first chain in the calculation
+ * @param chain2 The coordinates of the second chain in the calculation
+ * @param length1 The number of atoms in chain1
+ * @param length2 The number of atoms in chain2
+ * @param is_closed True if the last atom of the chains are connected to the first, false otherwise
+ * @param offx, offy, offz The amount of offset applied to the coordinates of the second chain (used in periodic linking number calculation)
+ * @return The linking number between chain1 and chain2
+ */
 double lk(double **chain1, double **chain2, int length1, int length2, bool is_closed, double offx /*= 0*/, double offy /*= 0*/, double offz /*= 0*/)
 {
 
@@ -470,6 +636,8 @@ double lk(double **chain1, double **chain2, int length1, int length2, bool is_cl
             }
 
             result += compute_one(p1, p2, p3, p4);
+            cout << compute_one(p1, p2, p3, p4) << "\n";
+            cout << "result: " << result << "\n";
 
         }
     }
@@ -478,34 +646,124 @@ double lk(double **chain1, double **chain2, int length1, int length2, bool is_cl
 
 }
 
-double *get_random_proj()
+/**
+ * Compute the inverse of a given matrix
+ * 
+ * @param m The matrix to invert
+ * @return The inverse of the matrix m
+ */
+vector<vector<double>> invert_mat(vector<vector<double>> m)
 {
 
-    random_device random_device;
-    mt19937 random_engine(random_device());
-    uniform_real_distribution<double> dist(0.0, 1.0);
-    double b[3];
-    double b1[3];
-    double *result;
-    result = new double[3];
-    double sum = 0;
-    while (sum > 1 || sum < 0.0001) {
-        b[0] = 2 * dist(random_engine) - 1;
-        b[1] = 2 * dist(random_engine) - 1;
-        b[2] = 2 * dist(random_engine) - 1;
-        b1[0] = b[0] * b[0];
-        b1[1] = b[1] * b[1];
-        b1[2] = b[2] * b[2];
-        sum = b1[0] + b1[1] + b1[2];
-    }
+    vector<vector<double>> ans;
+    vector<double> temp1;
+    vector<double> temp2;
+    vector<double> temp3;
+    double den = m[0][0]*m[1][1]*m[2][2]-m[0][0]*m[1][2]*m[2][1];
+    den += -m[1][0]*m[0][1]*m[2][2]+m[1][0]*m[0][2]*m[2][1];
+    den += m[2][0]*m[0][1]*m[1][2]-m[2][0]*m[0][2]*m[1][1];
 
-    result[0] = b1[0] / sqrt(sum);
-    result[1] = b1[1] / sqrt(sum);
-    result[2] = b1[2] / sqrt(sum);
-    return result;
+    temp1.push_back((m[1][1]*m[2][2]-m[1][2]*m[2][1]) / den);
+    temp1.push_back(-(m[0][1]*m[2][2]-m[0][2]*m[2][1]) / den);
+    temp1.push_back((m[0][1]*m[1][2]-m[0][2]*m[1][1]) / den);
+    temp2.push_back(-(m[1][0]*m[2][2]-m[1][2]*m[2][0]) / den);
+    temp2.push_back((m[0][0]*m[2][2]-m[0][2]*m[2][0]) / den);
+    temp2.push_back(-(m[0][0]*m[1][2]-m[0][2]*m[1][0]) / den);
+    temp3.push_back((m[1][0]*m[2][1]-m[1][1]*m[2][0]) / den);
+    temp3.push_back(-(m[0][0]*m[2][1]-m[0][1]*m[2][0]) / den);
+    temp3.push_back((m[0][0]*m[1][1]-m[0][1]*m[1][0]) / den);
+
+    ans.push_back(temp1);
+    ans.push_back(temp2);
+    ans.push_back(temp3);
+
+    return ans;
 
 }
 
+/**
+ * Generate a matrix that can be multiplied by coordinates to randomly project those coordinates
+ * 
+ * @return A matrix to be used to generate random projections
+ */
+vector<vector<double>> get_random_proj()
+{
+
+    int error;
+    ruv_buffer_t buffer;
+    int ret;
+    vector<vector<double>> matrix;
+    double *rvector = new double[3];
+
+    ret = ruv_init(&buffer);
+    ret = ruv_generate(&buffer, 3, rvector);
+    vector<double> temp;
+    for (int i = 0; i < 3; i++) {
+        temp.push_back(rvector[i]);
+    }
+    //cout << rvector[0] << ", " << rvector[1] << ", " << rvector[2] << "\n";
+    matrix.push_back(temp);
+    while(1) {
+        double vec[3];
+        double *cross = new double[3];
+        ruv_generate(&buffer, 3, vec);
+        cross3(rvector, vec, cross);
+        if (abs(cross[0]) > 0.0001 || abs(cross[1]) > 0.0001 || abs(cross[2]) > 0.0001) {
+            //cout << "cross1: " << cross[0] << ", " << cross[1] << ", " << cross[2] << "\n";
+            vector<double> temp1;
+            for (int i = 0; i < 3; i++) {
+                temp1.push_back(cross[i]);
+            }
+            matrix.push_back(temp1);
+            delete [] cross;
+            break;
+        } else {
+            delete [] cross;
+        }
+    }
+
+    while(1) {
+        double vec[3];
+        double *cross = new double[3];
+        ruv_generate(&buffer, 3, vec);
+        cross3(rvector, vec, cross);
+        if (abs(cross[0]) > 0.0001 || abs(cross[1]) > 0.0001 || abs(cross[2]) > 0.0001) {
+            //cout << "cross2: " << cross[0] << ", " << cross[1] << ", " << cross[2] << "\n";
+            vector<double> temp2;
+            for (int i = 0; i < 3; i++) {
+                temp2.push_back(cross[i]);
+            }
+            matrix.push_back(temp2);
+            delete [] cross;
+            break;
+        } else {
+            delete [] cross;
+        }
+    }
+
+    ruv_free(&buffer);
+    delete [] rvector;
+    double trans[3][3];
+    vector<vector<double>> transposed;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            trans[i][j] = matrix[j][i];
+        }
+        transposed.push_back({trans[i][0], trans[i][1], trans[i][2]});
+    }
+    vector<vector<double>> inverted = invert_mat(transposed);
+    
+    return inverted;
+
+}
+
+/**
+ * Unwrap the coordinates of a point within a system that uses periodic boundary conditions
+ * 
+ * @param p1, p2 Two adjacent points in a chain
+ * @param box_dim The dimensions of the periodic box for the given periodic system
+ * @return The unwrapped coordinates for p2
+ */
 vector<double> unwrap(vector<double> p1, vector<double> p2, double box_dim)
 {
     int imgx = round((p1[0] - p2[0]) / box_dim);
@@ -515,6 +773,13 @@ vector<double> unwrap(vector<double> p1, vector<double> p2, double box_dim)
     return {p2[0] + (imgx * box_dim), p2[1] + (imgy * box_dim), p2[2] + (imgz * box_dim)};
 }
 
+/**
+ * Obtain the point of intersection between two edges
+ * 
+ * @param p0, p1 The points that form the first edge in the calculation
+ * @param p2, p3 The points that form the second edge in the calculation
+ * @return The point of intersection between the two edges
+ */
 vector<double> get_intersection(vector<double> p0, vector<double> p1, vector<double> p2, vector<double> p3)
 {
 
@@ -530,6 +795,12 @@ vector<double> get_intersection(vector<double> p0, vector<double> p1, vector<dou
 
 }
 
+/**
+ * Multiply two polynomials, used in calculating the Jones polynomial
+ * 
+ * @param power The number of separate loops in the system being measured
+ * @return The polynomial of a single combination of crossing annealments
+ */
 map<int, double> mult_poly(int power)
 {
 
@@ -558,6 +829,12 @@ map<int, double> mult_poly(int power)
 
 }
 
+/**
+ * Multiply two polynomials where both are passed as parameters
+ * 
+ * @param a, b The two polynomials to multiply
+ * @return The product of a and b
+ */
 map<int, double> simple_mult(map<int, double> a, map<int, double> b)
 {
 
@@ -878,7 +1155,8 @@ double **read_coords(string fname, int *n)
     
     double **result = new double*[temp.size()];
     for (int i = 0; i < temp.size(); i++) {
-        result[i] = temp[i].data();
+        result[i] = new double[3];
+        copy(temp[i].begin(), temp[i].end(), result[i]);
     }
     
     *n = temp.size();
@@ -920,7 +1198,8 @@ double **read_coords(string fname, int *n, int chain_length, double box_dim)
     
     double **result = new double*[temp.size()];
     for (int i = 0; i < temp.size(); i++) {
-        result[i] = temp[i].data();
+        result[i] = new double[3];
+        copy(temp[i].begin(), temp[i].end(), result[i]);
     }
     
     *n = temp.size();
@@ -931,37 +1210,22 @@ vector<vector<double>> get_proj(vector<vector<double>> coords, int n)
 {
 
     vector<vector<double>> result;
-    double **temp = new double*[n];
-    for (int i = 0; i < n; i++) {
-        temp[i] = new double[2];
-        temp[i][0] = temp[i][1] = 0;
-    }
-    double *proj_vector = get_random_proj();
-    double **xy = get_two_vec(proj_vector);
-    double stack[3][2];
-    stack[0][0] = xy[0][0];
-    stack[0][1] = xy[1][0];
-    stack[1][0] = xy[0][1];
-    stack[1][1] = xy[1][1];
-    stack[2][0] = xy[0][2];
-    stack[2][1] = xy[1][2];
+    vector<vector<double>> matrix = get_random_proj();
 
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < 2; j++) {
-            for (int k = 0; k < 3; k++) {
-                temp[i][j] += coords[i][k] * stack[k][j];
-            }
-        }
+        double xk = ((matrix[0][0] * coords[i][0]) + (matrix[0][1] * coords[i][1]) + (matrix[0][2] * coords[i][2])) / sqrt((matrix[0][0] * matrix[0][0]) + (matrix[0][1] * matrix[0][1] + (matrix[0][2] * matrix[0][2])));
+        double yk = ((matrix[1][0] * coords[i][0]) + (matrix[1][1] * coords[i][1]) + (matrix[1][2] * coords[i][2])) / sqrt((matrix[1][0] * matrix[1][0]) + (matrix[1][1] * matrix[1][1] + (matrix[1][2] * matrix[1][2])));
+        double zk = ((matrix[2][0] * coords[i][0]) + (matrix[2][1] * coords[i][1]) + (matrix[2][2] * coords[i][2])) / sqrt((matrix[2][0] * matrix[2][0]) + (matrix[2][1] * matrix[2][1] + (matrix[2][2] * matrix[2][2])));
+        //cout << "new coords: " << xk << ", " << yk << ", " << zk << "\n";
+        vector<double> temp = {xk, yk, zk};
+        result.push_back(temp);
     }
-
-    for (int i = 0; i < n; i++) {
-        result.push_back({temp[i][0], temp[i][1]});
+    
+    for (int i = 0; i < 3; i++) {
+        //cout << matrix[i][0] << ", " << matrix[i][1] << ", " << matrix[i][2] << "\n";
     }
-    delete [] proj_vector;
-    delete_array(xy, 2);
-    delete_array(temp, n);
+    //exit(0);
     return result;
-
 }
 
 Struct next_mult_crossings(vector<vector<double>> proj, vector<vector<double>> coords, vector<vector<int>> neigh_array, int n, bool is_closed)

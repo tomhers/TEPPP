@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
 {
     int num_chains = stoi(argv[3]);
     int chain_length = stoi(argv[2]);
-    int file_type = stoi(argv[4]);
+    //int file_type = stoi(argv[4]);
     int num_repeats = 5;
     int num;
     double box_dim = dims_map[chain_length];
@@ -239,6 +239,7 @@ int main(int argc, char *argv[])
         if (it->second == 0 || it->second == -0) continue;
         outfile << it->second / num_chains << "A^" << it->first << " + ";
     }
+    outfile << "\n";
 
     outfile.close();
     return 0;

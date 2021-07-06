@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
     map<int, double> result;
     double **coords = read_coords(argv[1], &num);
     for (int i = 0; i < num_chains; i++) {
-        for (int j = start_chunk; j <= end_chunk j+=step) {
+        for (int j = start_chunk; j <= end_chunk; j+=step) {
             double **temp_coords = new double*[j];
             for (int k = 0; k < j; k++) {
                 temp_coords[k] = new double[3];

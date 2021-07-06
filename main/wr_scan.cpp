@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
             chain1[j][2] = coords[j + (i * chain_length)][2];
         }
 
-        for (int a = 10; a <= chain_length; a += 5) {
+        for (int a = start_chunk; a <= end_chunk; a += step) {
             double **temp_chain1 = new double*[a];
             for (int b = 0; b < a; b++) {
                 temp_chain1[b] = new double[3];
