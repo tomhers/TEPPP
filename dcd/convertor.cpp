@@ -17,7 +17,8 @@ namespace fs = std::filesystem;
 int main(int argc, char **argv)
 {
     std::string infname(argv[1]);
-    std::string outfname = "../converted/" + std::string(fs::path(infname).filename());
+    std::cout << "Line 20\n";
+    std::string outfname = "./converted/" + std::string(fs::path(infname).filename());
     std::string ext = std::string(fs::path(infname).extension());
     fs::path p = fs::path(outfname).replace_extension(".tepp");
     outfname = std::string(p);

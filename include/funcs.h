@@ -624,8 +624,6 @@ double lk(double **chain1, double **chain2, int length1, int length2, bool is_cl
             }
 
             result += compute_one(p1, p2, p3, p4);
-            cout << compute_one(p1, p2, p3, p4) << "\n";
-            cout << "result: " << result << "\n";
 
         }
     }
