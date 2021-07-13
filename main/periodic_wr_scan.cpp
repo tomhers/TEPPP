@@ -52,7 +52,9 @@ int main(int argc, char *argv[])
     int num_chains = stoi(argv[3]);
     int chain_length = stoi(argv[2]);
     int num;
-    double box_dim = dims_map[chain_length];
+    double box_dim;
+    if (argc >= 5) box_dim = stod(argv[4]);
+    else box_dim = 0;
     vector<double> box_dims = {box_dim, box_dim, box_dim};
     ofstream outfile;
     outfile.open("periodic_wr_scanout.txt");

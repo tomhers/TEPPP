@@ -157,24 +157,12 @@ struct proj_coords {
 
 typedef struct proj_coords Struct;
 
-map<int, double> dims_map = {
-    { 20, 6.676575 },
-    { 30, 7.6427684 },
-    { 40, 8.4119549 },
-    { 50, 9.061505 },
-    { 100, 11.41678 },
-    { 200, 14.38424 },
-    { 300, 16.465845 },
-    { 400, 18.12301 }
-};
-
 void delete_array(double **arr, int size);
 void delete_array(int **arr, int size);
 void normalize3(const double *v, double *ans);
 void cross3(const double *v1, const double *v2, double *ans);
 void sub3(const double *v1, const double *v2, double *ans);
 
-bool on_segment(double *p, double *q, double *r);
 bool intersect(double *p1, double *q1, double *p2, double *q2);
 bool are_collinear(vector<double> p1, vector<double> p2, vector<double> p3, vector<double> p4);
 bool intersect1(vector<double> p0, vector<double> p1, vector<double> p2, vector<double> p3, double *rx, double *ry);
@@ -199,14 +187,14 @@ vector<vector<int>> compute_img(double **coords, int n, vector<double> box_dims)
 vector<vector<int>> count_crossings(vector<vector<int>> neigh_array, vector<vector<double>> proj, int n, bool count_all);
 vector<vector<int>> reduce_crossings(vector<vector<int>> initial_crossings, vector<vector<double>> coords);
 
-double **get_two_vec(const double *proj);
-double **generate_random_walk(int n);
 double **read_coords(string fname, int *n);
 double **read_coords(string fname, int *n, int chain_length, double box_dim);
 vector<vector<double>> invert_mat(vector<vector<double>> m);
 vector<vector<double>> get_proj(vector<vector<double>> coords, int n);
 
 Struct next_mult_crossings(vector<vector<double>> proj, vector<vector<double>> coords, vector<vector<int>> neigh_array, int n, bool is_closed);
+
+vector<int> find_knot(map<int, double> poly, vector<string> params);
 
 /**
  * Delete 2D array of doubles
@@ -849,6 +837,14 @@ map<int, double> simple_mult(map<int, double> a, map<int, double> b)
 
 }
 
+/**
+ * Create a vector of vectors that each contain the indices of a given atom's neighbor atoms.
+ * Ex: neigh_array[1] contains the neighbors of atom 1, which are 0 and 2.
+ * 
+ * @param n The number of atoms in the system
+ * @param closed True if the last atom in the system is connected to the first, false otherwise
+ * @return A vector of vectors containing each atom's neighbors
+ */
 vector<vector<int>> generate_neigh_array(int n, bool closed)
 {
     vector<vector<int>> neigh_array;
@@ -867,6 +863,16 @@ vector<vector<int>> generate_neigh_array(int n, bool closed)
     return neigh_array;
 }
 
+/**
+ * Calculates all of the different images that contain an atom from the given system.
+ * Images are represented by a vector containing the x, y, and z image flags.
+ * The final result contains a vector of all the unique images of the given system.
+ * 
+ * @param coords The coordinates of the system to find the images of
+ * @param n The number of atoms in the system
+ * @param box_dims The dimensions of the periodic box
+ * @return A vector of vectors each containing a unique image used by the given system
+ */
 vector<vector<int>> compute_img(double **coords, int n, vector<double> box_dims)
 {
 
@@ -892,6 +898,15 @@ vector<vector<int>> compute_img(double **coords, int n, vector<double> box_dims)
 
 }
 
+/**
+ * Counts the number of intersections between edges in a given system.
+ * 
+ * @param neigh_array A vector of vectors containing each atom's neighboring atoms
+ * @param proj The projected coordinates of the system to count the crossings of
+ * @param n The number of atoms in the system
+ * @param count_all True if the last atom in the system is connected to the first, false otherwise
+ * @return A vector of vectors each containing 4 atoms that form two intersecting edges
+ */
 vector<vector<int>> count_crossings(vector<vector<int>> neigh_array, vector<vector<double>> proj, int n, bool count_all)
 {
 
@@ -951,6 +966,13 @@ vector<vector<int>> count_crossings(vector<vector<int>> neigh_array, vector<vect
 
 }
 
+/**
+ * Reduces the number of crossings in a system by performing Reidemeister I and II moves.
+ * 
+ * @param initial_crossings A vector of vectors each containing 4 atoms that form two intersecting edges
+ * @param coords The coordinates of the system
+ * @return A reduced vector of vectors each containing 4 atoms that form two intersecting edges
+ */
 vector<vector<int>> reduce_crossings(vector<vector<int>> initial_crossings, vector<vector<double>> coords)
 {
 
@@ -1040,89 +1062,13 @@ vector<vector<int>> reduce_crossings(vector<vector<int>> initial_crossings, vect
 
 }
 
-double **get_two_vec(const double *proj)
-{
-    random_device random_device;
-    mt19937 random_engine(random_device());
-    normal_distribution<double> dist(0.0, 1.0);
-    double a[3] = {0, 0, 0};
-    double b[3];
-    double **result;
-    result = new double*[2];
-    result[0] = new double[3];
-    result[1] = new double[3];
-    double a1[3];
-    double a2[3];
-    double proj1[3];
-    double sum = 0;
-    double sum1, sum2;
-    while (sum < 0.0001) {
-        a[0] = dist(random_engine);
-        a[1] = dist(random_engine);
-        a[2] = dist(random_engine);
-        a1[0] = a[0] * proj[0];
-        a1[1] = a[1] * proj[1];
-        a1[2] = a[2] * proj[2];
-        sum1 = a1[0] + a1[1] + a1[2];
-        a2[0] = proj[0] * proj[0];
-        a2[1] = proj[1] * proj[1];
-        a2[2] = proj[2] * proj[2];
-        sum2 = a2[0] + a2[1] + a2[2];
-        proj1[0] = proj[0] * sum1 * (1/sum2);
-        proj1[1] = proj[1] * sum1 * (1/sum2);
-        proj1[2] = proj[2] * sum1 * (1/sum2);
-        a[0] = a[0] - proj1[0];
-        a[1] = a[1] - proj1[1];
-        a[2] = a[2] - proj1[2];
-        a1[0] = a[0] * a[0];
-        a1[1] = a[1] * a[1];
-        a1[2] = a[2] * a[2];
-        sum = a1[0] + a1[1] + a1[2];
-    }
-
-    result[0][0] = a[0] / sqrt(sum);
-    result[0][1] = a[1] / sqrt(sum);
-    result[0][2] = a[2] / sqrt(sum);
-    result[1][0] = result[0][1] * proj[2] - result[0][2] * proj[1];
-    result[1][1] = -(result[0][0] * proj[2] - result[0][2] * proj[0]);
-    result[1][2] = result[0][0] * proj[1] - result[0][1] * proj[0];
-
-    return result;
-}
-
-double **generate_random_walk(int n)
-{
-
-    double **result = new double*[n];
-    for (int i = 0; i < n; i++) {
-        result[i] = new double[3];
-    }
-
-    random_device random_device;
-    mt19937 random_engine(random_device());
-    uniform_real_distribution<double> dist(0.0, 1.0);
-    double pi = 2 * asin(1.0);
-    for (int i = 0; i < n; i++) {
-        double u = dist(random_engine);
-        double v = dist(random_engine);
-        double theta = 2 * pi * u;
-        double phi = pi * v;
-        if (i == 0) {
-            result[i][0] = cos(theta) * sin(phi);
-            result[i][1] = sin(theta) * sin(phi);
-            result[i][2] = cos(phi);
-            cout << result[i][0] << ", " << result[i][1] << ", " << result[i][2] << "\n";
-        } else {
-            result[i][0] = result[i-1][0] + (cos(theta) * sin(phi));
-            result[i][1] = result[i-1][1] + (sin(theta) * sin(phi));
-            result[i][2] = result[i-1][2] + cos(phi);
-            cout << result[i][0] << ", " << result[i][1] << ", " << result[i][2] << "\n";
-        }
-    }
-    
-    return result;
-}
-
+/**
+ * Reads unwrapped coordinates from a .tepp file.
+ * 
+ * @param[in] fname The name (including path) of the .tepp file
+ * @param[out] n The number of atoms in the .tepp file
+ * @return A 2d array containing the coordinates for each atom in the system
+ */
 double **read_coords(string fname, int *n)
 {
 
@@ -1163,6 +1109,15 @@ double **read_coords(string fname, int *n)
     return result;
 }
 
+/**
+ * Reads wrapped coordinates from a .tepp file and unwraps them.
+ * 
+ * @param[in] fname The name (including path) of the .tepp file
+ * @param[out] n The number of atoms in the .tepp file
+ * @param[in] chain_length The length of each individual chain within the system
+ * @param[in] box_dim The dimensions of the periodic box
+ * @return A 2d array containing the unwrapped coordinates for each atom in the system
+ */
 double **read_coords(string fname, int *n, int chain_length, double box_dim)
 {
     string line;
@@ -1206,6 +1161,13 @@ double **read_coords(string fname, int *n, int chain_length, double box_dim)
     return result;
 }
 
+/**
+ * Projects the coordinates of a system using random projection vectors.
+ * 
+ * @param coords The coordinates of the system to project
+ * @param n The number of atoms in the system
+ * @return The projected coordinates of the system
+ */
 vector<vector<double>> get_proj(vector<vector<double>> coords, int n)
 {
 
@@ -1216,18 +1178,24 @@ vector<vector<double>> get_proj(vector<vector<double>> coords, int n)
         double xk = ((matrix[0][0] * coords[i][0]) + (matrix[0][1] * coords[i][1]) + (matrix[0][2] * coords[i][2])) / sqrt((matrix[0][0] * matrix[0][0]) + (matrix[0][1] * matrix[0][1] + (matrix[0][2] * matrix[0][2])));
         double yk = ((matrix[1][0] * coords[i][0]) + (matrix[1][1] * coords[i][1]) + (matrix[1][2] * coords[i][2])) / sqrt((matrix[1][0] * matrix[1][0]) + (matrix[1][1] * matrix[1][1] + (matrix[1][2] * matrix[1][2])));
         double zk = ((matrix[2][0] * coords[i][0]) + (matrix[2][1] * coords[i][1]) + (matrix[2][2] * coords[i][2])) / sqrt((matrix[2][0] * matrix[2][0]) + (matrix[2][1] * matrix[2][1] + (matrix[2][2] * matrix[2][2])));
-        //cout << "new coords: " << xk << ", " << yk << ", " << zk << "\n";
         vector<double> temp = {xk, yk, zk};
         result.push_back(temp);
     }
     
-    for (int i = 0; i < 3; i++) {
-        //cout << matrix[i][0] << ", " << matrix[i][1] << ", " << matrix[i][2] << "\n";
-    }
-    //exit(0);
     return result;
 }
 
+/**
+ * Finds edges that have intersect multiple other edges and breaks such edges so that 
+ * every edge has at most one intersection.
+ * 
+ * @param proj The projected coordinates of the system
+ * @param coords The actual coordinates of the system
+ * @param neigh_array A vector of vectors containing each atom's neighboring atoms
+ * @param n The number of atoms in the system
+ * @param is_closed True if the last atom in the system is connected to the first, false otherwise
+ * @return A struct containing the new projected coordinates, actual coordinates, and vector of crossings after all edges with multiple crossings have been split
+ */
 Struct next_mult_crossings(vector<vector<double>> proj, vector<vector<double>> coords, vector<vector<int>> neigh_array, int n, bool is_closed)
 {
 
@@ -1330,6 +1298,84 @@ Struct next_mult_crossings(vector<vector<double>> proj, vector<vector<double>> c
     final.success = true;
     return final;
 
+}
+
+/**
+ * Checks the given polynomial to see if it matches the polynomial of the given knot type(s).
+ * 
+ * @param poly The polynomial to check
+ * @param params A vector containing the names of knots to check poly against for matches
+ * @return A vector with the same length as params with a 1 at result[i] if poly matches the knot type at params[i], or a 0 at result[i] otherwise
+ */
+vector<int> find_knot(map<int, double> poly, vector<string> params)
+{
+    vector<int> result;
+    map<string, map<int, double>> knots;
+    map<int, double> trefoil1 = { { -16, -1 }, { -12, 1 }, { -4, 1 } };
+    knots["trefoil1"] = trefoil1;
+    map<int, double> trefoil2 = { { 4, 1 }, { 12, 1 }, { 16, -1 } };
+    knots["trefoil2"] = trefoil2;
+    map<int, double> figure8 = { { -8, 1 }, { -4, -1 }, { 0, 1 }, { 4, -1 }, { 8, 1 } };
+    knots["figure8"] = figure8;
+    map<int, double> pentafoil = { { -28, -1 }, { -24, 1 }, { -20, -1 }, { -16, 1 }, { -8, 1 }};
+    knots["pentafoil"] = pentafoil;
+    map<int, double> stevedore = { { -16, 1 }, { -12, -1 }, { -8, 1 }, { -4, -2 }, { 0, 2 }, { 4, -1 }, { 8, 1 }};
+    knots["stevedore"] = stevedore;
+    for (int i = 0; i < params.size(); i++) {
+        if (params[i].compare("trefoil") == 0) {
+            bool found = false;
+            for (int j = 0; j < knots["trefoil1"].size(); j++) {
+                if (poly.find(knots["trefoil1"][j]) == poly.end() || abs(poly[knots["trefoil1"][j]]) < 0.1) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) result.push_back(1);
+            found = false;
+            for (int j = 0; j < knots["trefoil2"].size(); j++) {
+                if (poly.find(knots["trefoil2"][j]) == poly.end() || abs(poly[knots["trefoil1"][j]]) < 0.1) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) result.push_back(1);
+            else result.push_back(0);
+        } else if (params[i].compare("figure8") == 0) {
+            bool found = false;
+            for (int j = 0; j < knots["figure8"].size(); j++) {
+                if (poly.find(knots["figure8"][j]) == poly.end() || abs(poly[knots["figure8"][j]]) < 0.1) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) result.push_back(1);
+            else result.push_back(0);
+        } else if (params[i].compare("pentafoil") == 0) {
+            bool found = false;
+            for (int j = 0; j < knots["pentafoil"].size(); j++) {
+                if (poly.find(knots["pentafoil"][j]) == poly.end() || abs(poly[knots["pentafoil"][j]]) < 0.1) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) result.push_back(1);
+            else result.push_back(0);
+        } else if (params[i].compare("stevedore") == 0) {
+            bool found = false;
+            for (int j = 0; j < knots["stevedore"].size(); j++) {
+                if (poly.find(knots["stevedore"][j]) == poly.end() || abs(poly[knots["stevedore"][j]]) < 0.1) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) result.push_back(1);
+            else result.push_back(0);
+        } else {
+            cout << params[i] << " knot not supported!\n";
+        }
+    }
+
+    return result;
 }
 
 #endif

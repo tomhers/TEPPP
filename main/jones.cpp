@@ -154,54 +154,6 @@ map<int, double> jones(string fname, double **coordinates, bool has_coords, int 
     return final;
 }
 
-string find_knot(map<int, double> poly, vector<string> params)
-{
-    map<string, map<int, double>> knots;
-    map<int, double> trefoil1 = { { -16, -1 }, { -12, 1 }, { -4, 1 } };
-    knots["trefoil1"] = trefoil1;
-    map<int, double> trefoil2 = { { 4, 1 }, { 12, 1 }, { 16, -1 } };
-    knots["trefoil2"] = trefoil2;
-    map<int, double> figure8 = { { -8, 1 }, { -4, -1 }, { 0, 1 }, { 4, -1 }, { 8, 1 } };
-    knots["figure8"] = figure8;
-    map<int, double> pentafoil = { { -28, -1 }, { -24, 1 }, { -20, -1 }, { -16, 1 }, { -8, 1 }};
-    knots["pentafoil"] = pentafoil;
-    map<int, double> stevedore = { { -16, 1 }, { -12, -1 }, { -8, 1 }, { -4, -2 }, { 0, 2 }, { 4, -1 }, { 8, 1 }};
-    knots["stevedore"] = stevedore;
-    for (int i = 0; i < params.size(); i++) {
-        if (params[i].compare("trefoil") == 0) {
-            bool found = false;
-            for (int j = 0; j < knots["trefoil1"].size(); j++) {
-                if (poly.find(knots["trefoil1"][j]) == poly.end() || abs(poly[knots["trefoil1"][j]]) < 0.1) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) return "trefoil";
-            found = false;
-            for (int j = 0; j < knots["trefoil2"].size(); j++) {
-                if (poly.find(knots["trefoil2"][j]) == poly.end() || abs(poly[knots["trefoil1"][j]]) < 0.1) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) return "trefoil";
-        } else if (params[i].compare("figure8") == 0) {
-            bool found = false;
-            for (int j = 0; j < knots["figure8"].size(); j++) {
-                if (poly.find(knots["figure8"][j]) == poly.end() || abs(poly[knots["figure8"][j]]) < 0.1) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) return "figure8";
-        } else {
-            cout << params[i] << " knot not supported!\n";
-        }
-    }
-
-    return "no knots found!";
-}
-
 int main(int argc, char *argv[])
 {
     int num_chains = stoi(argv[3]);
@@ -209,7 +161,9 @@ int main(int argc, char *argv[])
     //int file_type = stoi(argv[4]);
     int num_repeats = 5;
     int num;
-    double box_dim = dims_map[chain_length];
+    double box_dim;
+    if (argc >= 5) box_dim = stod(argv[4]);
+    else box_dim = 0;
     vector<double> box_dims = {box_dim, box_dim, box_dim};
     ofstream outfile;
     outfile.open("jonesout.txt");

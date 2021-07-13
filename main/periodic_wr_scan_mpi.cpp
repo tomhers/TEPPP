@@ -67,7 +67,9 @@ int main(int argc, char *argv[])
     int step = stoi(argv[6]);
     int chunk = num_chains / size;
     int num;
-    double box_dim = dims_map[chain_length];
+    double box_dim;
+    if (argc >= 8) box_dim = stod(argv[7]);
+    else box_dim = 0;
     vector<double> box_dims = {box_dim, box_dim, box_dim};
     ofstream outfile;
     string fname = to_string(chain_length) + "periodic_wrmpiout" + to_string(rank) + ".txt";

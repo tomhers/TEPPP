@@ -37,7 +37,6 @@ int main(int argc, char *argv[])
     outfile.open(fname);
 
     for (int i = rank * chunk; i < (rank+1) * chunk; i++) {
-        result[i-(rank*chunk)][i] = 0;
         double **chain1 = new double*[chain_length];
         for (int j = 0; j < chain_length; j++) {
             chain1[j] = new double[3];
