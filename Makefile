@@ -20,9 +20,9 @@ DCD_TARGET=convertor
 
 TEMP_TARGET=convertor jones
 
-SERIAL_TARGET=jones jones_scan lk lk_scan periodic_lk periodic_lk_scan periodic_wr periodic_wr_scan wr wr_scan
+SERIAL_TARGET=convertor jones jones_scan lk lk_scan periodic_lk periodic_lk_scan periodic_wr periodic_wr_scan wr wr_scan
 
-MPI_TARGET=jones_mpi lk_mpi lk_scan_mpi periodic_lk_mpi periodic_wr_mpi periodic_wr_scan_mpi wr_mpi wr_scan_mpi
+MPI_TARGET=convertor jones_mpi lk_mpi lk_scan_mpi periodic_lk_mpi periodic_wr_mpi periodic_wr_scan_mpi wr_mpi wr_scan_mpi
 
 SRC=$(wildcard ./dcd/*.cpp)
 
@@ -33,6 +33,12 @@ OBJ=$(patsubst ./dcd/%.cpp,./obj/%.o,$(SRC))
 
 all:$(TARGET)
 	@echo "Compilation Success"
+
+serial:$(SERIAL_TARGET)
+	@echo "Serial Compilation Success"
+
+mpi:$(MPI_TARGET)
+	@echo "Parallel Compilation Success"
 
 $(DCD_TARGET):Makefile
 
