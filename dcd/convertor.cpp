@@ -9,7 +9,7 @@ namespace fs = std::filesystem;
 
 /**
  * Converts a file with extension .pdb, .dcd, or .read_data
- * into a .tepp file that can be read by the rest of the functions.
+ * into a .teppp file that can be read by the rest of the functions.
  * Converted files are placed in $INSTALL_DIR/converted.
  * 
  * @param[in] argv[1] Name (including path) of file to be converted
@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     std::cout << "Line 20\n";
     std::string outfname = "./converted/" + std::string(fs::path(infname).filename());
     std::string ext = std::string(fs::path(infname).extension());
-    fs::path p = fs::path(outfname).replace_extension(".tepp");
+    fs::path p = fs::path(outfname).replace_extension(".teppp");
     outfname = std::string(p);
     std::ofstream outfile;
     outfile.open(outfname);
