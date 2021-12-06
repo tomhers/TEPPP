@@ -30,7 +30,7 @@ TEPPP requires a compiler which fully supports C++17 (GCC 7 and up). If parallel
 
 ### Usage
 
-The current version of TEPPP only supports running individual commands through the command line to obtain the desired results. If the coordinates of the system to be analyzed are in a file with an extension other than .tepp, they must be converted into a file readable by TEPPP. To do this, first create a folder named 'converted'and then run the following command in the top-level installation directory: `./convertor "/path/to/filename.ext" CHAIN_LENGTH NUM_CHAINS BOX_DIM` where `CHAIN_LENGTH` is the number of atoms in each chain, `NUM_CHAINS` is the number of chains in the system, and `BOX_DIM` is the length of one side of the periodic box if the system uses periodic boundary conditions. If the system does not use periodic boundary conditions, enter 0 for `BOX_DIM`. Note that only .read_data, .dump, and .dcd files are supported at this time, and that all coordinates must be provided to the convertor in unwrapped form. Once the convertor command has been run, the file with the converted data will be located in the `TEPPP/converted` directory for further use.
+The current version of TEPPP only supports running individual commands through the command line to obtain the desired results. If the coordinates of the system to be analyzed are in a file with an extension other than .tepp, they must be converted into a file readable by TEPPP. To do this, first create a folder named 'converted'and then run the following command in the top-level installation directory: `./convertor "/path/to/filename.ext". Note that only .read_data, .dump, and .dcd files are supported at this time, and that all coordinates must be provided to the convertor in unwrapped form. Once the convertor command has been run, the file with the converted data will be located in the `TEPPP/converted` directory for further use.
 
 Once a .tepp file with the desired coordinates has been generated, any of the software commands can be used in conjunction with the file to generate results. The `base` commands that are currently available are:
 
@@ -38,9 +38,10 @@ Once a .tepp file with the desired coordinates has been generated, any of the so
 * lk | Calculates the linking number between each pair of chains in the system
 * wr | Calculates the Writhe of each chain in the system
 
-All `base` commands are called using the same syntax. There is one required parameter:
+All `base` commands are called using the same syntax. The following parameters are required in the following order:
 
 1. The filename (including path) of the data file containing the coordinates of the system to analyze.
+2. CHAIN_LENGTH NUM_CHAINS BOX_DIM` where `CHAIN_LENGTH` is the number of atoms in each chain, `NUM_CHAINS` is the number of chains in the system, and `BOX_DIM` is the length of one side of the periodic box if the system uses periodic boundary conditions. If the system does not use periodic boundary conditions, enter 0 for `BOX_DIM`.
 
 In addition to these `base` commands, there are several types of variant commands also included in TEPPP. `periodic` commands analyze the topological entanglement of a given system while accounting for periodic boundary conditions. The `periodic` commands that are currently available are:
 
@@ -81,19 +82,19 @@ Additionally, there is an optional parameter that can be passed only to the `jon
 
 ### Examples
 
-To calculate the linking numbers between each pair of chains in a system found in "../data/systemA.tepp" with 100 chains each of length 20:
+To calculate the linking numbers between each pair of chains in a system found in "../converted/systemA.tepp" with 100 chains each of length 20:
 
-`./lk "../data/systemA.tepp"`
+`./lk "../converted/systemA.tepp"`
 
-To calculate the periodic Writhe of each chain in a system found in "../data/systemB.tepp" with 50 chains each of length 25 and a periodic box with length 9.275:
+To calculate the periodic Writhe of each chain in a system found in "../converted/systemB.tepp" with 50 chains each of length 25 and a periodic box with length 9.275:
 
-`./periodic_wr "../data/systemB.tepp"`
+`./periodic_wr "../converted/systemB.tepp"`
 
-To scan along each chain and calculate the Jones polynomial of each subset of each chain from size 10 to size 20, skipping by 2, and searching for a trefoil knot in a system found in "../data/systemC.tepp" with 10 chains each of length 200:
+To scan along each chain and calculate the Jones polynomial of each subset of each chain from size 10 to size 20, skipping by 2, and searching for a trefoil knot in a system found in "../converted/systemC.tepp" with 10 chains each of length 200:
 
-`./jones_scan "../data/systemC.tepp" 10 20 2 "trefoil"`
+`./jones_scan "../converted/systemC.tepp" 10 20 2 "trefoil"`
 
-To calculate the linking number between each pair of chains in a system found in "../data/systemD.tepp" with 20 chains each of length 20, using MPI to split the work between 4 different processes:
+To calculate the linking number between each pair of chains in a system found in "../converted/systemD.tepp" with 20 chains each of length 20, using MPI to split the work between 4 different processes:
 
-`mpirun -np 4 ./lk_mpi "../data/systemD.tepp"`
+`mpirun -np 4 ./lk_mpi "../converted/systemD.tepp"`
 
