@@ -16,7 +16,7 @@ If you use this code you must reference the following paper:
 
 Herschberg, T. and Panagiotou, E.,  A computational package for measuring Topological Entanglement in Polymers, Proteins and Periodic systems (TEPPP), 2021, (submitted) 
 
-visit www.elenipanagiotou.com for updated information
+Visit www.elenipanagiotou.com for updated information.
 
 # The Topological Entanglement of Polymers, Proteins, and Periodic systems (TEPPP) Software
 
