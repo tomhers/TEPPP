@@ -30,7 +30,7 @@ TEPPP requires a compiler which fully supports C++17 (GCC 7 and up). If parallel
 
 ### Usage
 
-The current version of TEPPP only supports running individual commands through the command line to obtain the desired results. If the coordinates of the system to be analyzed are in a file with an extension other than .tepp, they must be converted into a file readable by TEPPP. To do this, first create a folder named 'converted'and then run the following command in the top-level installation directory: `./convertor "/path/to/filename.ext". Note that only .read_data, .dump, and .dcd files are supported at this time, and that all coordinates must be provided to the convertor in unwrapped form. Once the convertor command has been run, the file with the converted data will be located in the `TEPPP/converted` directory for further use.
+The current version of TEPPP only supports running individual commands through the command line to obtain the desired results. If the coordinates of the system to be analyzed are in a file with an extension other than .teppp, they must be converted into a file readable by TEPPP. To do this, first create a folder named 'converted'and then run the following command in the top-level installation directory: `./convertor "/path/to/filename.ext". Note that only .read_data, .dump, and .dcd files are supported at this time, and that all coordinates must be provided to the convertor in unwrapped form. Once the convertor command has been run, the file with the converted data will be located in the `TEPPP/converted` directory for further use.
 
 Once a .tepp file with the desired coordinates has been generated, any of the software commands can be used in conjunction with the file to generate results. The `base` commands that are currently available are:
 
@@ -82,19 +82,19 @@ Additionally, there is an optional parameter that can be passed only to the `jon
 
 ### Examples
 
-To calculate the linking numbers between each pair of chains in a system found in "../converted/systemA.tepp" with 100 chains each of length 20:
+To calculate the linking numbers between each pair of chains in a system found in "../converted/systemA.teppp" with 100 chains each of length 20:
 
-`./lk "../converted/systemA.tepp"`
+`./lk "../converted/systemA.teppp"`
 
-To calculate the periodic Writhe of each chain in a system found in "../converted/systemB.tepp" with 50 chains each of length 25 and a periodic box with length 9.275:
+To calculate the periodic Writhe of each chain in a system found in "../converted/systemB.teppp" with 50 chains each of length 25 and a periodic box with length 9.275:
 
-`./periodic_wr "../converted/systemB.tepp"`
+`./periodic_wr "../converted/systemB.teppp"`
 
-To scan along each chain and calculate the Jones polynomial of each subset of each chain from size 10 to size 20, skipping by 2, and searching for a trefoil knot in a system found in "../converted/systemC.tepp" with 10 chains each of length 200:
+To scan along each chain and calculate the Jones polynomial of each subset of each chain from size 10 to size 20, skipping by 2, and searching for a trefoil knot in a system found in "../converted/systemC.teppp" with 10 chains each of length 200:
 
-`./jones_scan "../converted/systemC.tepp" 10 20 2 "trefoil"`
+`./jones_scan "../converted/systemC.teppp" 10 20 2 "trefoil"`
 
-To calculate the linking number between each pair of chains in a system found in "../converted/systemD.tepp" with 20 chains each of length 20, using MPI to split the work between 4 different processes:
+To calculate the linking number between each pair of chains in a system found in "../converted/systemD.teppp" with 20 chains each of length 20, using MPI to split the work between 4 different processes:
 
-`mpirun -np 4 ./lk_mpi "../converted/systemD.tepp"`
+`mpirun -np 4 ./lk_mpi "../converted/systemD.teppp"`
 
