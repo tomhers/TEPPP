@@ -52,7 +52,7 @@ The syntax for calling `periodic` commands is the same as the syntax for calling
 
 1. The filename (including path) of the data file containing the coordinates of the system to analyze.
 
-`scan` commands are used to analyze the topological entanglement of certain parts of chains rather than the entire chain. For example, if a user wants to the part of a single chain that contributes the most to the overall Writhe of that chain, they would use a `scan` command. The `scan` commands that are currently available are:
+`scan` commands are used to analyze the topological entanglement of certain parts of chains rather than the entire chain. For example, if a user wants to identify the part of a single chain that contributes the most to the overall Writhe of that chain, they would use a `scan` command. The `scan` commands that are currently available are:
 
 * jones_scan | Calculates the Jones polynomial along each chain at given intervals
 * lk_scan | Calculates the linking number along each pair of chains at given intervals
