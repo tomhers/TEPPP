@@ -43,6 +43,9 @@ All `base` commands are called using the same syntax. The following parameters a
 1. The filename (including path) of the data file containing the coordinates of the system to analyze.
 2. CHAIN_LENGTH NUM_CHAINS BOX_DIM` where `CHAIN_LENGTH` is the number of atoms in each chain, `NUM_CHAINS` is the number of chains in the system, and `BOX_DIM` is the length of one side of the periodic box if the system uses periodic boundary conditions. If the system does not use periodic boundary conditions, enter 0 for `BOX_DIM`.
 
+
+The output appears in the main directory with name command.txt
+
 In addition to these `base` commands, there are several types of variant commands also included in TEPPP. `periodic` commands analyze the topological entanglement of a given system while accounting for periodic boundary conditions. The `periodic` commands that are currently available are:
 
 * periodic_wr | Calculates the periodic Writhe of each chain in the system
