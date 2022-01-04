@@ -64,9 +64,11 @@ The syntax for calling `periodic` commands is the same as the syntax for calling
 Calling `scan` commands requires 4 parameters, which must be provided in the command line in the order shown below:
 
 1. The filename (including path) of the data file containing the coordinates of the system to analyze.
-2. The length of the initial interval at which to scan.
-3. The length of the final interval at which to scan.
-4. The amount to increment the interval after a scan completes.
+2. The length of the chains
+3. The number of chains
+4. The length of the initial interval at which to scan.
+5. The length of the final interval at which to scan.
+6. The amount to increment the interval after a scan completes.
 
 Additionally, there is an optional parameter that can be passed only to the `jones_scan` command. The user may scan for a specific knot type in order to find the location of a knot within a chain by passing the name of the knot to `jones_scan` in the command line. Currently, the only supported knot types are trefoil, figure-8, pentafoil, and stevedore.
 
