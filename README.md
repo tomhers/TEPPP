@@ -70,8 +70,6 @@ Calling `scan` commands requires 4 parameters, which must be provided in the com
 5. The length of the final interval at which to scan.
 6. The amount to increment the interval after a scan completes.
 
-Additionally, there is an optional parameter that can be passed only to the `jones_scan` command. The user may scan for a specific knot type in order to find the location of a knot within a chain by passing the name of the knot to `jones_scan` in the command line. Currently, the only supported knot types are trefoil, figure-8, pentafoil, and stevedore.
-
 `mpi` commands are parallel versions of the `base`, `periodic`, and `scan` commands discussed above. They leverage MPI to split the workload between a given number of processors rather than performing the work serially. The `mpi` commands that are currently available are:
 
 * jones_mpi | Calculates the Jones polynomial of each chain in the system in parallel
@@ -87,19 +85,15 @@ Additionally, there is an optional parameter that can be passed only to the `jon
 
 ### Examples
 
-To calculate the linking numbers between each pair of chains in a system found in "../converted/systemA.teppp" with 100 chains each of length 20:
+To calculate the linking numbers between each pair of chains in a system found in "../converted/systemA.teppp" with 100 chains each of length 20 and box length 13.35315:
 
-`./lk "../converted/systemA.teppp"`
+`./lk "../converted/systemA.teppp" 20 100 13.35315'
 
-To calculate the periodic Writhe of each chain in a system found in "../converted/systemB.teppp" with 50 chains each of length 25 and a periodic box with length 9.275:
+To scan along each chain and calculate the Jones polynomial of each subchain of each chain, for subchains of length 5 to length 15, with a step size of 5, along each chiain in a system found in "../converted/systemA.teppp" with 100 chains of length 20:
 
-`./periodic_wr "../converted/systemB.teppp"`
-
-To scan along each chain and calculate the Jones polynomial of each subset of each chain from size 10 to size 20, skipping by 2, and searching for a trefoil knot in a system found in "../converted/systemC.teppp" with 10 chains each of length 200:
-
-`./jones_scan "../converted/systemC.teppp" 10 20 2 "trefoil"`
+`./jones_scan "../converted/systemA.teppp" 20 100 5 15 5'
 
 To calculate the linking number between each pair of chains in a system found in "../converted/systemD.teppp" with 20 chains each of length 20, using MPI to split the work between 4 different processes:
 
-`mpirun -np 4 ./lk_mpi "../converted/systemD.teppp"`
+`mpirun -np 4 ./lk_mpi "../converted/systemD.teppp" 20 100 13.35315'
 
