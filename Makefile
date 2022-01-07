@@ -113,3 +113,6 @@ $(DCD_TARGET):$(OBJ)
 # 2: https://stackoverflow.com/questions/26564825/what-is-the-meaning-of-a-double-dollar-sign-in-bash-makefile
 clean:
 	rm -rfv ./build ./obj ./converted ./convertor ./output;
+
+format:
+	python ./scripts/clang-format-diff.py
