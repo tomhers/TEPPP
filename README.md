@@ -45,6 +45,11 @@ All `base` commands are called using the same syntax. The following parameters a
 
 
 The output appears in the main directory with name COMMANDout.txt
+For a system of N chains:
+The wr output, respectively the jones output, is the writhe (resp. jones polynomial) of each chain in the system, from chain 1 to chain N.
+The last line of the jones output is the average jones polynomial for the entire system.
+The lk output (resp. the periodic linking number output) is the linking number (resp. periodic linking number) of each pair of chains in the system, printed for i=1 to N-1 and j=i+1 to N.
+
 
 In addition to these `base` commands, there are several types of variant commands also included in TEPPP. `periodic` commands analyze the topological entanglement of a given system while accounting for periodic boundary conditions. The `periodic` commands that are currently available are:
 
