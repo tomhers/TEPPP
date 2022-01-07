@@ -14,8 +14,9 @@ int main(int argc, char *argv[])
     int num;
     double **coords = read_coords(argv[1], &num);
     double result[num_chains][num_chains];
+    create_ouput_dir();
     ofstream outfile;
-    outfile.open("periodic_lkout.txt");
+    outfile.open("./output/periodic_lk_out.txt");
 
     for (int i = 0; i < num_chains - 1; i++) {
         result[i][i] = 0;
@@ -26,7 +27,7 @@ int main(int argc, char *argv[])
             chain1[j][1] = coords[j + (i * chain_length)][1];
             chain1[j][2] = coords[j + (i * chain_length)][2];
         }
-
+        // Images1 is the cells that chain1 intersects
         vector<vector<int>> images1 = compute_img(chain1, chain_length, box_dims);
 
         for (int j = i + 1; j < num_chains; j++) {
@@ -38,6 +39,7 @@ int main(int argc, char *argv[])
                 chain2[k][2] = coords[k + (j * chain_length)][2];
             }
 
+            // Images2 is the cells that chain2 intersects
             vector<vector<int>> images2 = compute_img(chain2, chain_length, box_dims);
             vector<vector<int>> trans;
             for (int x = 0; x < images1.size(); x++) {
@@ -51,15 +53,18 @@ int main(int argc, char *argv[])
                         }
                     }
 
+                    // trans contains all the images of chain2 that intersect the minmal unfolding of chain1
+                    // temp is one such image
                     if (!found) {
                         trans.push_back(temp);
                         double res = lk(chain1, chain2, chain_length, chain_length, false, temp[0] * box_dims[0], temp[1] * box_dims[1], temp[2] * box_dims[2]);
+                        // at the end of the loop result[i][j] is the local periodic linking number between chain i and chain j
                         result[i][j] += res;
                     }
                 }
             }
 
-            outfile << "periodic linking number between chains " << i << " and " << j << ": " << result[i][j] << "\n";
+            outfile << i << " and " << j << ": " << result[i][j] << "\n";
             delete_array(chain2, chain_length);
         }
 

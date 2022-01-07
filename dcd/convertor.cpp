@@ -16,8 +16,16 @@ namespace fs = std::filesystem;
 */
 int main(int argc, char **argv)
 {
+    // Check if converted directory exists, if not create it
+    if (!fs::exists("converted"))
+    {
+        std::cout << "Creating converted directory" << std::endl;
+        fs::create_directory("converted");
+    }
+    else {
+        std::cout << "converted directory already exists. Skipping..." << std::endl;
+    }
     std::string infname(argv[1]);
-    std::cout << "Line 20\n";
     std::string outfname = "./converted/" + std::string(fs::path(infname).filename());
     std::string ext = std::string(fs::path(infname).extension());
     fs::path p = fs::path(outfname).replace_extension(".teppp");

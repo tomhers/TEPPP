@@ -56,8 +56,9 @@ int main(int argc, char *argv[])
     if (argc >= 5) box_dim = stod(argv[4]);
     else box_dim = 0;
     vector<double> box_dims = {box_dim, box_dim, box_dim};
+    create_ouput_dir();
     ofstream outfile;
-    outfile.open("periodic_wrout.txt");
+    outfile.open("./output/periodic_wr_out.txt");
     double **coords = read_coords(argv[1], &num);
     for (int i = 0; i < num_chains; i++) {
         double **temp_coords = new double*[chain_length];
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
         
         double pwr = periodic_wr(temp_coords, chain_length, box_dims, false);
         pwr += wr(temp_coords, chain_length, false);
-        outfile << "periodic writhe of chain " << i << ": " << pwr << "\n";
+        outfile << pwr << "\n";
         delete_array(temp_coords, chain_length);
     }
 

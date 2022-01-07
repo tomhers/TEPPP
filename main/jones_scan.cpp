@@ -1,5 +1,6 @@
 #include "../include/funcs.h"
-
+#include <filesystem>
+namespace fs = std::filesystem;
 using namespace std;
 
 map<int, double> anneal(vector<vector<int>> neigh_array, vector<vector<double>> coords, vector<vector<double>> proj, vector<vector<int>> crossings, int init_crossings, int n)
@@ -172,8 +173,9 @@ int main(int argc, char *argv[])
     }
     
     int num;
+    create_ouput_dir();
     ofstream outfile;
-    outfile.open("jonesout.txt");
+    outfile.open("./output/jones_scan_out.txt");
     map<int, double> result;
     double **coords = read_coords(argv[1], &num);
     for (int i = 0; i < num_chains; i++) {

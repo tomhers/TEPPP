@@ -1,5 +1,4 @@
 #include "../include/funcs.h"
-
 using namespace std;
 
 map<int, double> anneal(vector<vector<int>> neigh_array, vector<vector<double>> coords, vector<vector<double>> proj, vector<vector<int>> crossings, int init_crossings, int n)
@@ -166,7 +165,8 @@ int main(int argc, char *argv[])
     else box_dim = 0;
     vector<double> box_dims = {box_dim, box_dim, box_dim};
     ofstream outfile;
-    outfile.open("jonesout.txt");
+    create_ouput_dir();
+    outfile.open("./output/jones_out.txt");
     map<int, double> result;
     double **coords = read_coords(argv[1], &num);
     for (int i = 0; i < num_chains; i++) {
@@ -177,9 +177,8 @@ int main(int argc, char *argv[])
             temp_coords[j][1] = coords[(i * chain_length) + j][1];
             temp_coords[j][2] = coords[(i * chain_length) + j][2];
         }
-        
+
         map<int, double> jones_poly = jones("", temp_coords, true, chain_length, 10);
-        outfile << "Chain " << i << " jones: ";
         for (map<int, double>::const_iterator it = jones_poly.begin(); it != jones_poly.end(); ++it) {
             outfile << it->second << "A^" << it->first << " + ";
             result[it->first] += it->second;
@@ -188,7 +187,6 @@ int main(int argc, char *argv[])
         delete_array(temp_coords, chain_length);
     }
 
-    outfile << "Total system jones: ";
     for (map<int, double>::const_iterator it = result.begin(); it != result.end(); ++it) {
         if (it->second == 0 || it->second == -0) continue;
         outfile << it->second / num_chains << "A^" << it->first << " + ";

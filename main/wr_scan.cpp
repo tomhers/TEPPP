@@ -17,8 +17,9 @@ int main(int argc, char *argv[])
     int step = stoi(argv[6]);
     int num;
     double **coords = read_coords(argv[1], &num);
+    create_ouput_dir();
     ofstream outfile;
-    outfile.open("wrscanout.txt");
+    outfile.open("./output/wr_scan_out.txt");
 
     for (int i = 0; i < num_chains; i++) {
         double **chain1 = new double*[chain_length];

@@ -21,9 +21,7 @@
 
 #include <fstream>
 #include <iostream>
-
-#include "dcd_r.hpp"
-
+#include "../include/dcd_r.hpp"
 using namespace std;
 
 DCD_R::DCD_R(const char filename[])

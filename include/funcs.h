@@ -13,7 +13,8 @@
 #include <stdlib.h>
 #include <sstream>
 #include <fstream>
-
+#include <filesystem>
+namespace fs = std::filesystem;
 using namespace std;
 
 #ifdef __cplusplus
@@ -864,7 +865,7 @@ vector<vector<int>> generate_neigh_array(int n, bool closed)
 /**
  * Calculates all of the different images that contain an atom from the given system.
  * Images are represented by a vector containing the x, y, and z image flags.
- * The final result contains a vector of all the unique images of the given system.
+ * The final results contains a vector of all the cells that the parent image intersects.
  * 
  * @param coords The coordinates of the system to find the images of
  * @param n The number of atoms in the system
@@ -876,6 +877,10 @@ vector<vector<int>> compute_img(double **coords, int n, vector<double> box_dims)
 
     vector<vector<int>> result;
     for (int i = 0; i < n; i++) {
+         /**
+         * We assume input chains (unfolded) in an orgin centered box
+         * 
+         */
         int ximg = round(coords[i][0] / (2 * box_dims[0]));
         int yimg = round(coords[i][1] / (2 * box_dims[1]));
         int zimg = round(coords[i][2] / (2 * box_dims[2]));
@@ -1374,6 +1379,23 @@ vector<int> find_knot(map<int, double> poly, vector<string> params)
     }
 
     return result;
+}
+
+/**
+ * This function creates an output directory if it doesn't exist,
+ * if it does exists, skip creating the directory.
+ *
+ */
+void create_ouput_dir(){
+    if(!fs::exists("output"))
+    {
+        cout << "Creating output directory..." << endl;
+        fs::create_directory("output");
+    }
+    else
+    {
+        cout << "Output directory already exists! Skipping..." << endl;
+    }
 }
 
 #endif

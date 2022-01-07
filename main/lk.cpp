@@ -1,5 +1,4 @@
 #include "../include/funcs.h"
-
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -21,7 +20,8 @@ int main(int argc, char *argv[])
     ofstream outfile;
     int count = 0;
     double sum = 0;
-    outfile.open("lkout.txt");
+    create_ouput_dir();
+    outfile.open("./output/lk_out.txt");
 
     for (int i = 0; i < num_chains; i++) {
         double **chain1 = new double*[chain_length];
@@ -33,6 +33,11 @@ int main(int argc, char *argv[])
             
         }
 
+       /**
+        * @brief This for loop is used to calculate the coordinates 
+        * for both chain 1 and chain 2 for the lk calculation.
+        * 
+        */
         for (int j = i + 1 ; j < num_chains; j++) {
             double **chain2 = new double*[chain_length];
             for (int k = 0; k < chain_length; k++) {
@@ -43,7 +48,7 @@ int main(int argc, char *argv[])
             }
 
             double res = lk(chain1, chain2, chain_length, chain_length, true);
-            outfile << "linking number between chains " << i << " and " << j << ": " << res << "\n";
+            outfile << i << " and " << j << ": " << res << "\n";
             sum += abs(res);
             count++;
             delete_array(chain2, chain_length);

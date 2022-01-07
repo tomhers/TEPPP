@@ -19,8 +19,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "dcd.hpp"
-
+#include "../include/dcd.hpp"
 using namespace std;
 
 DCD::DCD()

@@ -14,15 +14,18 @@ LD_OPT=
 
 MKDIR=mkdir -p ./obj
 
-TARGET=convertor jones jones_scan lk lk_scan periodic_lk periodic_lk_scan periodic_wr periodic_wr_scan wr wr_scan jones_mpi lk_mpi lk_scan_mpi periodic_lk_mpi periodic_wr_mpi periodic_wr_scan_mpi wr_mpi wr_scan_mpi
+MKDIR_BUILD=mkdir -p ./build
+
+TARGET=convertor ./build/jones ./build/jones_scan ./build/lk ./build/lk_scan ./build/periodic_lk ./build/periodic_lk_scan ./build/periodic_wr ./build/periodic_wr_scan ./build/wr ./build/wr_scan ./build/jones_mpi ./build/lk_mpi ./build/lk_scan_mpi ./build/periodic_lk_mpi ./build/periodic_wr_mpi ./build/periodic_wr_scan_mpi ./build/wr_mpi ./build/wr_scan_mpi
+
 
 DCD_TARGET=convertor
 
-TEMP_TARGET=convertor jones
+TEMP_TARGET=convertor ./build/jones
 
-SERIAL_TARGET=convertor jones jones_scan lk lk_scan periodic_lk periodic_lk_scan periodic_wr periodic_wr_scan wr wr_scan
+SERIAL_TARGET=convertor ./build/jones ./build/jones_scan ./build/lk ./build/lk_scan ./build/periodic_lk ./build/periodic_lk_scan ./build/periodic_wr ./build/periodic_wr_scan ./build/wr ./build/wr_scan
 
-MPI_TARGET=convertor jones_mpi lk_mpi lk_scan_mpi periodic_lk_mpi periodic_wr_mpi periodic_wr_scan_mpi wr_mpi wr_scan_mpi
+MPI_TARGET=convertor ./build/jones_mpi ./build/lk_mpi ./build/lk_scan_mpi ./build/periodic_lk_mpi ./build/periodic_wr_mpi ./build/periodic_wr_scan_mpi ./build/wr_mpi ./build/wr_scan_mpi
 
 SRC=$(wildcard ./dcd/*.cpp)
 
@@ -48,42 +51,65 @@ $(DCD_TARGET):Makefile
 
 $(DCD_TARGET):$(OBJ)
 	$(CXX) $(CXX_OPT) $(LD_LIB) $(OBJ) -o $@ $(LD_OPT)
-jones:main/jones.cpp
-	$(CXX) $? -o main/$@
-jones_scan:main/jones_scan.cpp
-	$(CXX) $? -o main/$@
-lk:main/lk.cpp
-	$(CXX) $? -o main/$@
-lk_scan:main/lk_scan.cpp
-	$(CXX) $? -o main/$@
-periodic_lk:main/periodic_lk.cpp
-	$(CXX) $? -o main/$@
-periodic_lk_scan:main/periodic_lk_scan.cpp
-	$(CXX) $? -o main/$@
-periodic_wr:main/periodic_wr.cpp
-	$(CXX) $? -o main/$@
-periodic_wr_scan:main/periodic_wr_scan.cpp
-	$(CXX) $? -o main/$@
-wr:main/wr.cpp
-	$(CXX) $? -o main/$@
-wr_scan:main/wr_scan.cpp
-	$(CXX) $? -o main/$@
-jones_mpi:main/jones_mpi.cpp
-	$(MPICXX) $? -o main/$@
-lk_mpi:main/lk_mpi.cpp
-	$(MPICXX) $? -o main/$@
-lk_scan_mpi:main/lk_scan_mpi.cpp
-	$(MPICXX) $? -o main/$@
-periodic_lk_mpi:main/periodic_lk_mpi.cpp
-	$(MPICXX) $? -o main/$@
-periodic_wr_mpi:main/periodic_wr_mpi.cpp
-	$(MPICXX) $? -o main/$@
-periodic_wr_scan_mpi:main/periodic_wr_scan_mpi.cpp
-	$(MPICXX) $? -o main/$@
-wr_mpi:main/wr_mpi.cpp
-	$(MPICXX) $? -o main/$@
-wr_scan_mpi:main/wr_scan_mpi.cpp
-	$(MPICXX) $? -o main/$@
 
+./build/jones:./main/jones.cpp
+	@$(MKDIR_BUILD)
+	$(CXX) $? -o $@
+./build/jones_scan:./main/jones_scan.cpp
+	@$(MKDIR_BUILD)
+	$(CXX) $? -o $@
+./build/lk:main/lk.cpp
+	@$(MKDIR_BUILD)
+	$(CXX) $? -o $@
+./build/lk_scan:main/lk_scan.cpp
+	@$(MKDIR_BUILD)
+	$(CXX) $? -o $@
+./build/periodic_lk:main/periodic_lk.cpp
+	@$(MKDIR_BUILD)
+	$(CXX) $? -o $@
+./build/periodic_lk_scan:main/periodic_lk_scan.cpp
+	@$(MKDIR_BUILD)
+	$(CXX) $? -o $@
+./build/periodic_wr:main/periodic_wr.cpp
+	@$(MKDIR_BUILD)
+	$(CXX) $? -o $@
+./build/periodic_wr_scan:main/periodic_wr_scan.cpp
+	@$(MKDIR_BUILD)
+	$(CXX) $? -o $@
+./build/wr:main/wr.cpp
+	@$(MKDIR_BUILD)
+	$(CXX) $? -o $@
+./build/wr_scan:main/wr_scan.cpp
+	@$(MKDIR_BUILD)
+	$(CXX) $? -o $@
+./build/jones_mpi:main/jones_mpi.cpp
+	@$(MKDIR_BUILD)
+	$(MPICXX) $? -o $@
+./build/lk_mpi:main/lk_mpi.cpp
+	@$(MKDIR_BUILD)
+	$(MPICXX) $? -o $@
+./build/lk_scan_mpi:main/lk_scan_mpi.cpp
+	@$(MKDIR_BUILD)
+	$(MPICXX) $? -o $@
+./build/periodic_lk_mpi:main/periodic_lk_mpi.cpp
+	@$(MKDIR_BUILD)
+	$(MPICXX) $? -o $@
+./build/periodic_wr_mpi:main/periodic_wr_mpi.cpp
+	@$(MKDIR_BUILD)
+	$(MPICXX) $? -o $@
+./build/periodic_wr_scan_mpi:main/periodic_wr_scan_mpi.cpp
+	@$(MKDIR_BUILD)
+	$(MPICXX) $? -o $@
+./build/wr_mpi:main/wr_mpi.cpp
+	@$(MKDIR_BUILD)
+	$(MPICXX) $? -o $@
+./build/wr_scan_mpi:main/wr_scan_mpi.cpp
+	@$(MKDIR_BUILD)
+	$(MPICXX) $? -o $@
+
+# Remove all object files, executables, and the converted directory
+# See the following stackoverflow posts for more information on the loops below:
+# 1: https://stackoverflow.com/questions/1490949/how-to-write-loop-in-a-makefile
+# 2: https://stackoverflow.com/questions/26564825/what-is-the-meaning-of-a-double-dollar-sign-in-bash-makefile
 clean:
-	rm -f $(TARGET) ./obj/*.o
+	rm -rfv ./build ./obj ./converted ./convertor ./output;

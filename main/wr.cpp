@@ -17,11 +17,11 @@ int main(int argc, char *argv[])
     } else {
         coords = read_coords(argv[1], &num, chain_length, box_dim);
     }
-
+    create_ouput_dir();
     ofstream outfile;
     int count = 0;
     double sum = 0;
-    outfile.open("wrout.txt");
+    outfile.open("./output/wr_out.txt");
 
     for (int i = 0; i < num_chains; i++) {
         double **chain1 = new double*[chain_length];
@@ -33,8 +33,7 @@ int main(int argc, char *argv[])
         }
 
         double res = wr(chain1, chain_length, true);
-        outfile << "writhe of chain " << i <<  ": " << res << "\n";
-
+        outfile << res << "\n";
         sum += abs(res);
         count++;
         delete_array(chain1, chain_length);
